@@ -9,10 +9,10 @@
                 <b-icon-plus-circle></b-icon-plus-circle>
             </b-button>
             <br>
-            <b-card style="background-color: whitesmoke">
+            <b-card style="background-color: whitesmoke" border-variant="secondary">
                 <b-form-row>
                     <b-col cols="2" v-for="player in players" :key="player.position">
-                        <b-card :style="'background-color: ' + player.character.colour">
+                        <b-card :style="'background-color: ' + player.character.colour" border-variant="secondary">
                             <b-row>
                                 <b-col align-self="start">
                                     <h2>
@@ -38,15 +38,16 @@
             <br>
             <b-button size="lg" block pill variant="info" @click="setUp" id="start-btn">Start</b-button>
         </b-container>
-        <b-container style="margin-left: 0; margin-right: 0; max-width: fit-content" v-else>
+        <!--Main Game Environment-->
+        <b-container style="max-width: 100%" v-else>
             <b-row>
-                <b-col cols="5">
+                <b-col>
                     <!--Table-->
-                    <cluedo-table :players="players" :table="table"></cluedo-table>
+                    <Table :players="players" :table="table"></Table>
                 </b-col>
                 <b-col>
-                    <b-card :style="'background-color: ' + players[activePlayerPosition-1].character.colour">
-                        <!--Main Menu-->
+                    <b-card border-variant="secondary" :style="'background-color: ' + players[activePlayerPosition-1].character.colour">
+                        <!--Main Buttons/actions-->
                         <b-row>
                             <b-col cols="1" align-self="start">
                                 <h2>
@@ -55,7 +56,7 @@
                             </b-col>
                             <b-col align-self="start"><h2>{{activePlayerName}}'s turn</h2></b-col>
                         </b-row>
-                        <hr>
+                        <hr style="border-color: inherit">
                         <b-row>
                             <b-col>
                                 <b-button-group vertical>
@@ -81,23 +82,21 @@
                             </b-col>
                         </b-row>
                     </b-card>
-                    <hr>
+                    <hr style="border-color: inherit">
                     <!--Players-->
-                    <b-card-group columns>
-                        <b-card v-for="player in players" :key="player.position"
-                                :style="'background-color: ' + player.character.colour">
-                            {{ player }}
-                        </b-card>
-                    </b-card-group>
+                    <view-players :players="players" :cardsPerPerson="cardsPerPerson"></view-players>
                     <!--Add Rumour Modal-->
-                    <cluedo-add-rumour-modal :table="table" :players="players"
-                                             @add-rumour="addRumour"></cluedo-add-rumour-modal>
+                    <add-rumour-modal :table="table" :players="players"
+                                             @add-rumour="addRumour"></add-rumour-modal>
                     <!--View Rumours Modal-->
-                    <b-modal id="viewRumoursModal" scrollable ok-only ok-title="Back" ok-variant="secondary"
+                    <b-modal id="viewRumoursModal" centered size="lg" scrollable ok-only ok-title="Back" ok-variant="secondary"
                              title="Past rumours">
-                        <b-card v-for="rumour in rumours" :key="rumour.id">
-                            {{ rumour }}
+                        <section v-for="rumour in rumours" :key="rumour.id">
+                        <b-card border-variant="secondary" style="background-color: whitesmoke">
+                            <view-rumour :table="table" :players="players" :rumour="rumour"></view-rumour>
                         </b-card>
+                        <br>
+                        </section>
                     </b-modal>
                     <!--Assign Cards Modal-->
                     <assign-cards-modal :table="table" :players="players"
@@ -111,13 +110,15 @@
 <script>
     import 'bootstrap-vue/dist/bootstrap-vue.css'
     import {characters, weapons, rooms} from '@/constants';
-    import CluedoTable from "@/components/cluedo-table";
-    import CluedoAddRumourModal from "@/components/cluedo-add-rumour-modal";
-    import AssignCardsModal from "@/components/assign-cards-modal";
+    import Table from "@/components/Table";
+    import AddRumourModal from "@/components/AddRumourModal";
+    import AssignCardsModal from "@/components/AssignCardsModal";
+    import ViewRumour from "@/components/ViewRumour";
+    import ViewPlayers from "@/components/ViewPlayers";
 
     export default {
         name: 'App',
-        components: {AssignCardsModal, CluedoAddRumourModal, CluedoTable},
+        components: {ViewPlayers, ViewRumour, AssignCardsModal, AddRumourModal, Table},
         data() {
             return {
                 characters: characters,
@@ -129,7 +130,7 @@
                 success: false,
                 fail: false,
                 numberOfPlayers: 2,
-                cardsPerPerson: 9,
+                cardsPerPerson: 8,
                 myPosition: '',
                 activePlayerPosition: 0, // start at zero so nextPlayer() moves to the first player
                 activePlayerName: '',
@@ -202,9 +203,9 @@
             this.table.where = [];
         },
 
-        watcher: {
+        watch: {
             numberOfPlayers() {
-                this.cardsPerPerson = Math.floor(18 / this.numberOfPlayers);
+                this.cardsPerPerson = Math.floor(16 / this.numberOfPlayers);
             }
         },
 
@@ -218,6 +219,7 @@
              */
             addRumour(rumour) {
                 rumour.playerPosition = this.activePlayerPosition;
+                rumour.id = this.nextId++;
                 this.rumours.splice(0, 0, rumour);
                 this.processLogic();
             },
@@ -231,7 +233,7 @@
                     console.log('Card ' + event.card.name + ' is already found');
                 } else {
                     if (event.playerPos !== 0) {
-                        this.players[event.playerPos - 1].cards.push(event.card.id);
+                        this.players[event.playerPos - 1].cards.push(event.card);
                     }
                     this.giveCard(event.card, event.playerPos);
                     this.processLogic();

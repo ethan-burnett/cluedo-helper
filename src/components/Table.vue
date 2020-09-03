@@ -1,5 +1,5 @@
 <template>
-    <b-card style="background-color: whitesmoke; margin-left: 5px; margin-right: 0">
+    <b-card border-variant="secondary" style="background-color: whitesmoke; margin-left: 5px; margin-right: 0">
         <b-row>
             <b-col style="text-align: start" cols="3"><h4><strong>Who</strong></h4></b-col>
             <b-col cols="1" v-for="player in players" :key="player.character.name">
@@ -26,6 +26,7 @@
                 <b-icon-blank></b-icon-blank>
             </b-col>
         </b-row>
+        <hr style="border-color: inherit">
         <b-row>
             <b-col style="text-align: start" cols="3"><h4><strong>What</strong></h4></b-col>
         </b-row>
@@ -49,6 +50,7 @@
                 <b-icon-blank></b-icon-blank>
             </b-col>
         </b-row>
+        <hr style="border-color: inherit">
         <b-row>
             <b-col style="text-align: start" cols="3"><h4><strong>Where</strong></h4></b-col>
         </b-row>
@@ -77,7 +79,7 @@
 
 <script>
     export default {
-        name: "cluedo-table",
+        name: "Table",
         props: {
             table: Object,
             players: Array

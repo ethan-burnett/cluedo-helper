@@ -46,7 +46,7 @@
     import {characters, rooms, weapons} from "@/constants";
 
     export default {
-        name: "assign-cards-modal",
+        name: "AssignCardsModal",
         props: {
             table: Object,
             players: Array

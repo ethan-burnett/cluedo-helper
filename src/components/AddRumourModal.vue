@@ -49,7 +49,7 @@
     import {characters, rooms, weapons} from "@/constants";
 
     export default {
-        name: "cluedo-add-rumour-modal",
+        name: "AddRumourModal",
         props: {
             table: Object,
             players: Array
