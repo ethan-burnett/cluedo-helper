@@ -46,7 +46,8 @@
                     <Table :players="players" :table="table"></Table>
                 </b-col>
                 <b-col>
-                    <b-card border-variant="secondary" :style="'background-color: ' + players[activePlayerPosition-1].character.colour">
+                    <b-card border-variant="secondary"
+                            :style="'background-color: ' + players[activePlayerPosition-1].character.colour">
                         <!--Main Buttons/actions-->
                         <b-row>
                             <b-col cols="1" align-self="start">
@@ -87,15 +88,16 @@
                     <view-players :players="players" :cardsPerPerson="cardsPerPerson"></view-players>
                     <!--Add Rumour Modal-->
                     <add-rumour-modal :table="table" :players="players"
-                                             @add-rumour="addRumour"></add-rumour-modal>
+                                      @add-rumour="addRumour"></add-rumour-modal>
                     <!--View Rumours Modal-->
-                    <b-modal id="viewRumoursModal" centered size="lg" scrollable ok-only ok-title="Back" ok-variant="secondary"
+                    <b-modal id="viewRumoursModal" centered size="lg" scrollable ok-only ok-title="Back"
+                             ok-variant="secondary"
                              title="Past rumours">
                         <section v-for="rumour in rumours" :key="rumour.id">
-                        <b-card border-variant="secondary" style="background-color: whitesmoke">
-                            <view-rumour :table="table" :players="players" :rumour="rumour"></view-rumour>
-                        </b-card>
-                        <br>
+                            <b-card border-variant="secondary" style="background-color: whitesmoke">
+                                <view-rumour :table="table" :players="players" :rumour="rumour"></view-rumour>
+                            </b-card>
+                            <br>
                         </section>
                     </b-modal>
                     <!--Assign Cards Modal-->
@@ -131,6 +133,7 @@
                 fail: false,
                 numberOfPlayers: 2,
                 cardsPerPerson: 8,
+                numberOfCards: 19,
                 myPosition: '',
                 activePlayerPosition: 0, // start at zero so nextPlayer() moves to the first player
                 activePlayerName: '',
@@ -138,12 +141,12 @@
                 activeWhat: weapons[0].value,
                 activeWhere: rooms[0].value,
                 solution: [],
-                nextId: 1,
+                nextId: 0,
                 nextPosition: 3,
                 rumours: [
                     {
                         cards: [],
-                        isWrong: false,
+                        isFinished: false,
                         playerPosition: null, // Rumour caster
                         playerWhoAnswered: null // Rumour falsifier
                     }
@@ -210,18 +213,148 @@
         },
 
         methods: {
+            /**
+             * Get the card from the real cards via the given ID
+             */
+            getCard(id) {
+                for (let i = 0; i < this.table.who.length; i++) {
+                    if (this.table.who[i].id === id) return this.table.who[i];
+                }
+                for (let i = 0; i < this.table.what.length; i++) {
+                    if (this.table.what[i].id === id) return this.table.what[i];
+                }
+                for (let i = 0; i < this.table.where.length; i++) {
+                    if (this.table.where[i].id === id) return this.table.where[i];
+                }
+            },
+            /**
+             * Set the card to the real card via the given ID
+             */
+            setCard(id, card) {
+                for (let i = 0; i < this.table.who.length; i++) {
+                    if (this.table.who[i].id === id) {
+                        this.table.who[i] = card;
+                    }
+                }
+                for (let i = 0; i < this.table.what.length; i++) {
+                    if (this.table.what[i].id === id) {
+                        this.table.what[i] = card;
+                    }
+                }
+                for (let i = 0; i < this.table.where.length; i++) {
+                    if (this.table.where[i].id === id) {
+                        this.table.where[i] = card;
+                    }
+                }
+            },
+            processPlayers() {
+                let isUpdated = false;
+                for (let pos = 1; pos <= this.numberOfPlayers; pos++) {
+                    let player = this.players[pos-1];
+
+                    let cards = this.table.who.concat(this.table.what).concat(this.table.where);
+                    cards = cards.filter(j => j.players[pos-1] !== '/');
+                    if (cards.length <= this.cardsPerPerson) {
+                        for (let i = 0; i < cards.length; i++) {
+                            if (cards[i].players[pos-1] === ' ') {
+                                player.cards.push(cards[i]);
+                                this.giveCard(cards[i], pos);
+                                isUpdated = true;
+                            }
+                        }
+                    }
+
+                    if (player.cards.length === this.cardsPerPerson) {
+                        for (let i = 0; i < this.numberOfCards; i++) {
+                            let card = this.getCard(i);
+                            if (card.players[pos-1] === ' ') {
+                                card.players[pos-1] = '/';
+                                isUpdated = true;
+                                this.setCard(i, card);
+                            }
+                        }
+                    }
+
+                    this.players[pos-1] = player;
+                }
+                return isUpdated;
+            },
+            processIsTheOne(tableCards) {
+                let isUpdated = false;
+                let foundIsTheOne = tableCards.filter(card => card.isTheOne).length >= 1;
+                let cards = tableCards.filter(card => !card.isFound || card.isTheOne);
+                if (cards.length === 1 && !foundIsTheOne) {
+                    cards[0].isTheOne = true;
+                    this.giveCard(cards[0], 0);
+                    isUpdated = true;
+                }
+                if (cards.length > 1 && !foundIsTheOne) {
+                    for (let i = 0; i < cards.length; i++) {
+                        if (!cards[i].players.includes(' ') && !cards[i].players.includes('O') && !cards[i].isFound) {
+                            cards[i].isTheOne = true;
+                            this.giveCard(cards[i], 0);
+                            isUpdated = true;
+                            break;
+                        }
+                    }
+                }
+                return isUpdated;
+            },
+            processCards() {
+                let isUpdated = false;
+                if (this.processIsTheOne(this.table.who)) isUpdated = true;
+                if (this.processIsTheOne(this.table.what)) isUpdated = true;
+                if (this.processIsTheOne(this.table.where)) isUpdated = true;
+                return isUpdated;
+            },
+            processRumours() {
+                for (let i = 0; i < this.rumours.length; i++) {
+                    if (!this.rumours[i].isFinished) { // Rumour is pending
+                        let who = this.getCard(this.rumours[i].cards.who);
+                        let what = this.getCard(this.rumours[i].cards.what);
+                        let where = this.getCard(this.rumours[i].cards.where);
+
+                    }
+                }
+            },
             processLogic() {
-                console.log('Processing logic');
+                let isUpdated = true;
+                while (isUpdated) {
+                    console.log('Processing logic');
+                    isUpdated = this.processPlayers();
+                    if (this.processCards()) isUpdated = true;
+                    if (this.processRumours()) isUpdated = true;
+                }
+            },
+            ackDontHave(rumour) {
+                let who = this.getCard(rumour.cards.who);
+                let what = this.getCard(rumour.cards.what);
+                let where = this.getCard(rumour.cards.where);
+
+                let index = rumour.playerPosition % this.numberOfPlayers; // Index of next player after player who rumoured
+                while ((rumour.playerWhoAnswered > 0 && index !== rumour.playerWhoAnswered - 1) || (
+                    rumour.playerWhoAnswered <= -1 && index !== rumour.playerPosition - 1)) {
+                    who.players[index] = '/';
+                    what.players[index] = '/';
+                    where.players[index] = '/';
+                    index = (index + 1) % this.numberOfPlayers;
+                }
+
+                this.setCard(rumour.cards.who, who);
+                this.setCard(rumour.cards.what, what);
+                this.setCard(rumour.cards.where, where);
+
+                this.processLogic();
             },
             /**
              * Adds a rumour with the active who, what and where.
-             * Call processLogic.
+             * Calls processLogic.
              */
             addRumour(rumour) {
                 rumour.playerPosition = this.activePlayerPosition;
                 rumour.id = this.nextId++;
-                this.rumours.splice(0, 0, rumour);
-                this.processLogic();
+                this.rumours.splice(0, 0, rumour); // Add rumour to the start of the list
+                this.ackDontHave(rumour);
             },
             /**
              * Proceed to assign the player the card if it's not already found.
@@ -229,7 +362,7 @@
              * @param event an object containing a card and a player position
              */
             assignCard(event) {
-                if (event.card.isFound) {
+                if (event.card.isFound || event.card.isTheOne) {
                     console.log('Card ' + event.card.name + ' is already found');
                 } else {
                     if (event.playerPos !== 0) {

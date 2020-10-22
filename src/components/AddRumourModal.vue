@@ -1,5 +1,6 @@
 <template>
-    <b-modal centered size="lg" @change="isBtnActive = true" id="addRumourModal" ok-only ok-title="Back" ok-variant="secondary"
+    <b-modal centered size="lg" @change="isBtnActive = true" id="addRumourModal" ok-only ok-title="Back"
+             ok-variant="secondary"
              title="Add a rumour">
         <b-row>
             <b-col>
@@ -60,7 +61,7 @@
                 weapons: weapons,
                 rooms: rooms,
                 options: [],
-                selectedOption: 0,
+                selectedOption: -1,
                 isBtnActive: true,
                 activeWho: characters[0].value,
                 activeWhat: weapons[0].value,
@@ -68,7 +69,7 @@
             }
         },
         mounted() {
-            this.options = [{text: 'No one', value: 0}];
+            this.options = [{text: 'No one', value: -1}];
             for (let i = 0; i < this.players.length; i++) {
                 this.options.push({text: this.players[i].name, value: this.players[i].position})
             }
@@ -97,7 +98,7 @@
                 }
                 let rumour = {
                     cards: [who, what, where],
-                    isWrong: false,
+                    isFinished: false,
                     playerWhoAnswered: this.selectedOption
                 };
                 this.$emit("add-rumour", rumour);

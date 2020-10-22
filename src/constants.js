@@ -2,7 +2,7 @@ export const characters = [
     {value: {name: "Green", colour: "rgba(39,155,8,0.61)"}, text: "Green"},
     {value: {name: "Mustard", colour: "rgba(255,255,0,0.5)"}, text: "Mustard"},
     {value: {name: "Peacock", colour: "rgba(0,0,207,0.65)"}, text: "Peacock"},
-    {value: {name: "Plum", colour: "rgba(126,38,198,0.72)"}, text: "Plum"},
+    {value: {name: "Plum", colour: "rgba(145,17,255,0.85)"}, text: "Plum"},
     {value: {name: "Scarlet", colour: "rgba(163,3,0,0.78)"}, text: "Scarlet"},
     {value: {name: "White", colour: "rgb(255,255,255)"}, text: "White"}];
 
