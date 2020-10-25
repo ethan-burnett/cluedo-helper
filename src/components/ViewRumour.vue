@@ -72,7 +72,7 @@
             this.what = this.findCard(this.rumour.cards[1], this.table.what);
             this.where = this.findCard(this.rumour.cards[2], this.table.where);
             this.caster = this.players[this.rumour.playerPosition - 1];
-            if (this.rumour.playerWhoAnswered !== 0) {
+            if (this.rumour.playerWhoAnswered > 0) {
                 this.falsifier = this.players[this.rumour.playerWhoAnswered - 1];
             }
         },

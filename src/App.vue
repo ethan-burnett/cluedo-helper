@@ -191,7 +191,6 @@
                 ]
             }
         },
-
         mounted() {
             this.rumours = [];
             this.players.push({
@@ -205,14 +204,15 @@
             this.table.what = [];
             this.table.where = [];
         },
-
         watch: {
             numberOfPlayers() {
                 this.cardsPerPerson = Math.floor(16 / this.numberOfPlayers);
             }
         },
-
         methods: {
+            contradiction(message) {
+                console.log("Contradiction detected:", message);
+            },
             /**
              * Get the card from the real cards via the given ID
              */
@@ -250,13 +250,13 @@
             processPlayers() {
                 let isUpdated = false;
                 for (let pos = 1; pos <= this.numberOfPlayers; pos++) {
-                    let player = this.players[pos-1];
+                    let player = this.players[pos - 1];
 
                     let cards = this.table.who.concat(this.table.what).concat(this.table.where);
-                    cards = cards.filter(j => j.players[pos-1] !== '/');
+                    cards = cards.filter(j => j.players[pos - 1].value !== '/');
                     if (cards.length <= this.cardsPerPerson) {
                         for (let i = 0; i < cards.length; i++) {
-                            if (cards[i].players[pos-1] === ' ') {
+                            if (cards[i].players[pos - 1].value === ' ') {
                                 player.cards.push(cards[i]);
                                 this.giveCard(cards[i], pos);
                                 isUpdated = true;
@@ -267,15 +267,15 @@
                     if (player.cards.length === this.cardsPerPerson) {
                         for (let i = 0; i < this.numberOfCards; i++) {
                             let card = this.getCard(i);
-                            if (card.players[pos-1] === ' ') {
-                                card.players[pos-1] = '/';
+                            if (card.players[pos - 1].value === ' ') {
+                                card.players[pos - 1].value = '/';
                                 isUpdated = true;
                                 this.setCard(i, card);
                             }
                         }
                     }
 
-                    this.players[pos-1] = player;
+                    this.players[pos - 1] = player;
                 }
                 return isUpdated;
             },
@@ -290,7 +290,11 @@
                 }
                 if (cards.length > 1 && !foundIsTheOne) {
                     for (let i = 0; i < cards.length; i++) {
-                        if (!cards[i].players.includes(' ') && !cards[i].players.includes('O') && !cards[i].isFound) {
+                        let isAllSlashed = true;
+                        for (let j = 0; j < this.numberOfPlayers; j++) {
+                            if (cards[i].players[j].value !== '/' ) isAllSlashed = false;
+                        }
+                        if (isAllSlashed && !cards[i].isFound) {
                             cards[i].isTheOne = true;
                             this.giveCard(cards[i], 0);
                             isUpdated = true;
@@ -308,14 +312,43 @@
                 return isUpdated;
             },
             processRumours() {
+                let isUpdated = false;
                 for (let i = 0; i < this.rumours.length; i++) {
-                    if (!this.rumours[i].isFinished) { // Rumour is pending
-                        let who = this.getCard(this.rumours[i].cards.who);
-                        let what = this.getCard(this.rumours[i].cards.what);
-                        let where = this.getCard(this.rumours[i].cards.where);
-
+                    let rumour = this.rumours[i], cards = [];
+                    if (!rumour.isFinished) { // Rumour is pending
+                        let who = this.getCard(rumour.cards[0]);
+                        let what = this.getCard(rumour.cards[1]);
+                        let where = this.getCard(rumour.cards[2]);
+                        if (who.players[rumour.playerWhoAnswered - 1].value === ' ') {
+                            cards.push(who);
+                        } else if (who.players[rumour.playerWhoAnswered - 1].value === 'O') {
+                            rumour.isFinished = true;
+                        }
+                        if (what.players[rumour.playerWhoAnswered - 1].value === ' ') {
+                            cards.push(what);
+                        } else if (what.players[rumour.playerWhoAnswered - 1].value === 'O') {
+                            rumour.isFinished = true;
+                        }
+                        if (where.players[rumour.playerWhoAnswered - 1].value === ' ') {
+                            cards.push(where);
+                        } else if (where.players[rumour.playerWhoAnswered - 1].value === 'O') {
+                            rumour.isFinished = true;
+                        }
+                        if (!rumour.isFinished && cards.length === 0) {
+                            this.contradiction(`rumour (${who.name}, ${what.name}, ${where.name}) ` +
+                            `asked by "${this.players[rumour.playerPosition - 1].name}" and answered by "` +
+                            `${this.players[rumour.playerWhoAnswered - 1].name}". "` +
+                            `${this.players[rumour.playerWhoAnswered - 1].name}" can't have any of the give cards!`);
+                        }
+                        else if (!rumour.isFinished && cards.length === 1) {
+                            isUpdated = true;
+                            this.players[rumour.playerWhoAnswered - 1].cards.push(cards[0]);
+                            this.giveCard(cards[0], rumour.playerWhoAnswered)
+                        }
+                        this.rumours[i] = rumour;
                     }
                 }
+                return isUpdated;
             },
             processLogic() {
                 let isUpdated = true;
@@ -327,22 +360,22 @@
                 }
             },
             ackDontHave(rumour) {
-                let who = this.getCard(rumour.cards.who);
-                let what = this.getCard(rumour.cards.what);
-                let where = this.getCard(rumour.cards.where);
+                let who = this.getCard(rumour.cards[0]);
+                let what = this.getCard(rumour.cards[1]);
+                let where = this.getCard(rumour.cards[2]);
 
                 let index = rumour.playerPosition % this.numberOfPlayers; // Index of next player after player who rumoured
                 while ((rumour.playerWhoAnswered > 0 && index !== rumour.playerWhoAnswered - 1) || (
                     rumour.playerWhoAnswered <= -1 && index !== rumour.playerPosition - 1)) {
-                    who.players[index] = '/';
-                    what.players[index] = '/';
-                    where.players[index] = '/';
+                    who.players[index].value = '/';
+                    what.players[index].value = '/';
+                    where.players[index].value = '/';
                     index = (index + 1) % this.numberOfPlayers;
                 }
 
-                this.setCard(rumour.cards.who, who);
-                this.setCard(rumour.cards.what, what);
-                this.setCard(rumour.cards.where, where);
+                this.setCard(rumour.cards[0], who);
+                this.setCard(rumour.cards[1], what);
+                this.setCard(rumour.cards[2], where);
 
                 this.processLogic();
             },
@@ -353,6 +386,7 @@
             addRumour(rumour) {
                 rumour.playerPosition = this.activePlayerPosition;
                 rumour.id = this.nextId++;
+                rumour.isFinished = rumour.playerWhoAnswered === -1;
                 this.rumours.splice(0, 0, rumour); // Add rumour to the start of the list
                 this.ackDontHave(rumour);
             },
