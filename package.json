@@ -1,5 +1,6 @@
 {
-  "name": "cluedo",
+  "name": "cluedo-helper",
+  "homepage": "http://ethanburnett.com",
   "version": "0.1.0",
   "private": true,
   "scripts": {
