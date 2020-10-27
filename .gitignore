@@ -1,5 +1,6 @@
 .DS_Store
 node_modules
+# Line below is commented out for github pages
 /dist
 
 
