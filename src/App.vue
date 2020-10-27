@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <h1>Cluedo</h1>
+        <h1>Cluedx</h1>
         <b-container v-if="!isSetUp">
             <!--Setting up-->
             <label>Add the players, including yourself</label>

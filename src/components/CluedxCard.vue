@@ -13,7 +13,7 @@
 
 <script>
     export default {
-        name: "CluedoCard",
+        name: "CluedxCard",
         props: {
             card: Object,
             players: Array

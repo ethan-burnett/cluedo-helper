@@ -10,13 +10,13 @@
         </strong>.</p>
         <b-row>
             <b-col>
-                <cluedo-card :players="players" :card="findCard(rumour.cards[0], table.who)"></cluedo-card>
+                <cluedx-card :players="players" :card="findCard(rumour.cards[0], table.who)"></cluedx-card>
             </b-col>
             <b-col>
-                <cluedo-card :players="players" :card="findCard(rumour.cards[1], table.what)"></cluedo-card>
+                <cluedx-card :players="players" :card="findCard(rumour.cards[1], table.what)"></cluedx-card>
             </b-col>
             <b-col>
-                <cluedo-card :players="players" :card="findCard(rumour.cards[2], table.where)"></cluedo-card>
+                <cluedx-card :players="players" :card="findCard(rumour.cards[2], table.where)"></cluedx-card>
             </b-col>
         </b-row>
     </div>
@@ -24,11 +24,11 @@
 
 <script>
     import {characters} from "@/constants";
-    import CluedoCard from "@/components/CluedoCard";
+    import CluedxCard from "@/components/CluedxCard";
 
     export default {
         name: "ViewRumour",
-        components: {CluedoCard},
+        components: {CluedxCard},
         props: {
             table: Object,
             players: Array,
