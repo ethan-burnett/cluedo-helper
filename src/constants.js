@@ -16,8 +16,10 @@ export const weapons = [
 
 export const rooms = [
     {value: {name: "Bathroom"}, text: "Bathroom"},
+    {value: {name: "Study"}, text: "Study"},
     {value: {name: "Dining Room"}, text: "Dining Room"},
     {value: {name: "Games Room"}, text: "Games Room"},
+    {value: {name: "Garage"}, text: "Garage"},
     {value: {name: "Bedroom"}, text: "Bedroom"},
     {value: {name: "Living Room"}, text: "Living Room"},
     {value: {name: "Kitchen"}, text: "Kitchen"},

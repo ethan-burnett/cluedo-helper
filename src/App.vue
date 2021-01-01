@@ -132,8 +132,8 @@
                 success: false,
                 fail: false,
                 numberOfPlayers: 2,
-                cardsPerPerson: 8,
-                numberOfCards: 19,
+                cardsPerPerson: 9,
+                numberOfCards: 21,
                 myPosition: '',
                 activePlayerPosition: 0, // start at zero so nextPlayer() moves to the first player
                 activePlayerName: '',
@@ -206,7 +206,7 @@
         },
         watch: {
             numberOfPlayers() {
-                this.cardsPerPerson = Math.floor(16 / this.numberOfPlayers);
+                this.cardsPerPerson = Math.floor(18 / this.numberOfPlayers);
             }
         },
         methods: {
