@@ -11,7 +11,7 @@
             <br>
             <b-card style="background-color: whitesmoke" border-variant="secondary">
                 <b-form-row>
-                    <b-col cols="2" v-for="player in players" :key="player.position">
+                    <b-col sm="12" md="6" lg="2" v-for="player in players" :key="player.position">
                         <b-card :style="'background-color: ' + player.character.colour" border-variant="secondary">
                             <b-row>
                                 <b-col align-self="start">
