@@ -1,5 +1,5 @@
 <template>
-    <b-card-group columns style="column-count: 4">
+    <b-card-group columns style="column-count: 3">
         <b-card v-for="player in players" :key="player.position" no-body
                 :style="'background-color: ' + player.character.colour" border-variant="secondary">
             <b-card-header>

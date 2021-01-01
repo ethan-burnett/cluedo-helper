@@ -41,13 +41,13 @@
         <!--Main Game Environment-->
         <b-container style="max-width: 100%" v-else>
             <b-row>
-                <b-col>
+                <b-col md="12" lg="7">
                     <!--Table-->
                     <Table :players="players" :table="table"></Table>
                 </b-col>
-                <b-col>
+                <b-col md="12" lg="5">
                     <b-card border-variant="secondary"
-                            :style="'background-color: ' + players[activePlayerPosition-1].character.colour">
+                            :style="'min-width: 35em; background-color: ' + players[activePlayerPosition-1].character.colour">
                         <!--Main Buttons/actions-->
                         <b-row>
                             <b-col cols="1" align-self="start">

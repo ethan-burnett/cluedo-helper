@@ -1,5 +1,5 @@
 <template>
-    <b-card border-variant="secondary" style="background-color: whitesmoke; margin-left: 5px; margin-right: 0">
+    <b-card border-variant="secondary" style="min-width: 35em; background-color: whitesmoke; margin-left: 0px; margin-right: 0">
         <b-row>
             <b-col style="text-align: start" cols="3"><h4><strong>Who</strong></h4></b-col>
             <b-col cols="1" v-for="player in players" :key="player.character.name">
