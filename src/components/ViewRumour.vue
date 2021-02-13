@@ -1,13 +1,20 @@
 <template>
     <div>
-        <p v-if="falsifier === null">Rumour by <strong
-                :style="'background-color: ' + caster.character.colour">{{ caster.name }}
-        </strong>, no one answered.</p>
-        <p v-else>Rumour by <strong
-                :style="'background-color: ' + caster.character.colour">{{ caster.name }}
-        </strong>, answered by <strong
-                :style="'background-color: ' + falsifier.character.colour">{{ falsifier.name }}
-        </strong>.</p>
+        <b-row>
+            <b-col>
+                <p v-if="falsifier === null">Rumour by <strong
+                        :style="'background-color: ' + caster.character.colour">{{ caster.name }}
+                </strong>, no one answered.</p>
+                <p v-else>Rumour by <strong
+                        :style="'background-color: ' + caster.character.colour">{{ caster.name }}
+                </strong>, answered by <strong
+                        :style="'background-color: ' + falsifier.character.colour">{{ falsifier.name }}
+                </strong>.</p>
+            </b-col>
+            <b-col cols="1">
+                <b-button variant="danger" pill size="sm" @click="removeRumour(rumour.id)"><b-icon-x/></b-button>
+            </b-col>
+        </b-row>
         <b-row>
             <b-col>
                 <cluedx-card :players="players" :card="findCard(rumour.cards[0], table.who)"></cluedx-card>
@@ -89,6 +96,9 @@
                         return cards[i];
                     }
                 }
+            },
+            removeRumour(id) {
+                this.$emit("remove-rumour", id);
             }
         }
     }

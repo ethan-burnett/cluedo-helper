@@ -10,7 +10,10 @@
             <b-list-group flush>
                 <b-list-group-item v-for="card in player.cards" :key="card.id"
                                    style="background-color: inherit; border-color: inherit">
-                    {{ card.name }}
+                    <b-row>
+                        <b-col>{{card.name}}</b-col>
+                        <b-col><div @click="undoAssignCard(card.id)"><b-icon-x/></div></b-col>
+                    </b-row>
                 </b-list-group-item>
             </b-list-group>
         </b-card>
@@ -23,10 +26,23 @@
         props: {
             players: Array,
             cardsPerPerson: Number
+        },
+        methods: {
+            undoAssignCard(id) {
+                this.$emit("undo-assign-card", id);
+            }
         }
     }
 </script>
 
 <style scoped>
+
+    .row {
+    white-space: nowrap;
+    }
+
+    .row > div {
+    display: inline-block;
+    }
 
 </style>

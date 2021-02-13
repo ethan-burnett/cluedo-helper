@@ -85,7 +85,7 @@
                     </b-card>
                     <hr style="border-color: inherit">
                     <!--Players-->
-                    <view-players :players="players" :cardsPerPerson="cardsPerPerson"></view-players>
+                    <view-players :players="players" :cardsPerPerson="cardsPerPerson" @undo-assign-card="undoAssignCard"></view-players>
                     <!--Add Rumour Modal-->
                     <add-rumour-modal :table="table" :players="players"
                                       @add-rumour="addRumour"></add-rumour-modal>
@@ -95,7 +95,7 @@
                              title="Past rumours">
                         <section v-for="rumour in rumours" :key="rumour.id">
                             <b-card border-variant="secondary" style="background-color: whitesmoke">
-                                <view-rumour :table="table" :players="players" :rumour="rumour"></view-rumour>
+                                <view-rumour :table="table" :players="players" :rumour="rumour" @remove-rumour="removeRumour"></view-rumour>
                             </b-card>
                             <br>
                         </section>
@@ -143,6 +143,7 @@
                 solution: [],
                 nextId: 0,
                 nextPosition: 3,
+                assignedManually: [],
                 rumours: [
                     {
                         cards: [],
@@ -386,9 +387,55 @@
             addRumour(rumour) {
                 rumour.playerPosition = this.activePlayerPosition;
                 rumour.id = this.nextId++;
-                rumour.isFinished = rumour.playerWhoAnswered === -1;
                 this.rumours.splice(0, 0, rumour); // Add rumour to the start of the list
                 this.ackDontHave(rumour);
+            },
+            removeRumour(id) {
+                if (!confirm("Do you really want to remove that?")) return;
+                let rumours = this.rumours.filter(rumour => rumour.id !== id);
+                this.rumours = rumours;
+                this.recheckAllDeductions();
+            },
+            recheckAllDeductions() {
+                //Hide rumours
+                for (let i = 0; i < this.rumours.length; i++) {
+                    this.rumours[i].isFinished = true;
+                }
+
+                //Remove player cards
+                for (let i = 0; i < this.players.length; i++) {
+                    this.players[i].cards = [];
+                }
+
+                //Reset table cards
+                const savedId = this.nextId;
+                this.nextId = 0
+                this.table.who = this.setUpCards(this.characters);
+                this.table.what = this.setUpCards(this.weapons);
+                this.table.where = this.setUpCards(this.rooms);
+                this.nextId = savedId;
+
+                //Reassign manually added cards
+                for (let i = 0; i < this.assignedManually.length; i++) {
+                    let event = this.assignedManually[i];
+                    if (event.playerPos !== 0) {
+                        this.players[event.playerPos - 1].cards.push(event.card);
+                    }
+                    this.giveCard(event.card, event.playerPos);
+                    this.processLogic();
+                }
+
+                //Retry rumours
+                for (let i = 0; i < this.rumours.length; i++) {
+                    let rumour = this.rumours[i];
+                    rumour.isFinished = rumour.playerWhoAnswered === -1;
+                    this.ackDontHave(rumour);
+                }
+            },
+            undoAssignCard(id) {
+                let cards = this.assignedManually.filter(event => event.card.id !== id);
+                this.assignedManually = cards;
+                this.recheckAllDeductions();
             },
             /**
              * Proceed to assign the player the card if it's not already found.
@@ -399,6 +446,7 @@
                 if (event.card.isFound || event.card.isTheOne) {
                     console.log('Card ' + event.card.name + ' is already found');
                 } else {
+                    this.assignedManually.push(event);
                     if (event.playerPos !== 0) {
                         this.players[event.playerPos - 1].cards.push(event.card);
                     }

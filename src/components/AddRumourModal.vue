@@ -98,7 +98,7 @@
                 }
                 let rumour = {
                     cards: [who, what, where],
-                    isFinished: false,
+                    isFinished: this.selectedOption === -1,
                     playerWhoAnswered: this.selectedOption
                 };
                 this.$emit("add-rumour", rumour);
