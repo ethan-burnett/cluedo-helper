@@ -12,7 +12,8 @@
                                    style="background-color: inherit; border-color: inherit">
                     <b-row>
                         <b-col>{{card.name}}</b-col>
-                        <b-col><div @click="undoAssignCard(card.id)"><b-icon-x/></div></b-col>
+                        <b-col v-if="isManual(card.id)"><div @click="undoAssignCard(card.id)"><b-icon-x/></div></b-col>
+                        <b-col v-else><b-icon-blank/></b-col>
                     </b-row>
                 </b-list-group-item>
             </b-list-group>
@@ -25,12 +26,17 @@
         name: "ViewPlayers",
         props: {
             players: Array,
-            cardsPerPerson: Number
+            cardsPerPerson: Number,
+            assignedManually: Array
         },
         methods: {
             undoAssignCard(id) {
                 this.$emit("undo-assign-card", id);
-            }
+            },
+            isManual(id) {
+                let foundCardsWithId = this.assignedManually.filter(event => id === event.card.id);
+                return foundCardsWithId.length > 0;
+            },
         }
     }
 </script>

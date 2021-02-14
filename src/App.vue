@@ -43,7 +43,7 @@
             <b-row>
                 <b-col md="12" lg="7">
                     <!--Table-->
-                    <Table :players="players" :table="table"></Table>
+                    <Table :players="players" :table="table" :assignedManually="assignedManually" @undo-assign-card="undoAssignCard"></Table>
                 </b-col>
                 <b-col md="12" lg="5">
                     <b-card border-variant="secondary"
@@ -85,7 +85,7 @@
                     </b-card>
                     <hr style="border-color: inherit">
                     <!--Players-->
-                    <view-players :players="players" :cardsPerPerson="cardsPerPerson" @undo-assign-card="undoAssignCard"></view-players>
+                    <view-players :players="players" :cardsPerPerson="cardsPerPerson" :assignedManually="assignedManually" @undo-assign-card="undoAssignCard"></view-players>
                     <!--Add Rumour Modal-->
                     <add-rumour-modal :table="table" :players="players"
                                       @add-rumour="addRumour"></add-rumour-modal>
